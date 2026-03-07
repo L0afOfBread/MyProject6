@@ -6,6 +6,7 @@ public class AnimController : MonoBehaviour
 {
     public Animator playerAnimator;
     public bool canAttack = true;
+    private bool inEnemy;
     void Update()
     {
         AnimatorClipInfo[] clipInfo = playerAnimator.GetCurrentAnimatorClipInfo(0);
@@ -30,6 +31,17 @@ public class AnimController : MonoBehaviour
         else
         {
             canAttack = true;
+        }
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            inEnemy = true;
+        }
+        else
+        {
+            inEnemy |= false;
         }
     }
 }

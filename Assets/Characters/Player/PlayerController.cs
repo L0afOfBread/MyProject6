@@ -1,53 +1,76 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody Rb;
-    public int speed = 35;
+
+    [Header("Настройки движения")]
+    public float speed = 15f; // Для MovePosition значения обычно меньше, чем для Translate
     public float rotationSpeed = 650f;
+    public float jumpForce = 5f;
+
+    [Header("Состояние")]
     private float horizontal;
     private float vertical;
-    public int jumpForce = 100;
     private bool isGrounded = false;
-    private void Start()
+
+    public static float playerHp = 100f;
+    private Animator anim;
+
+    public GameObject deathWindow;
+
+    void Start()
     {
         Rb = GetComponent<Rigidbody>();
+        anim = GetComponent<Animator>(); // Получаем компонент
+
+        Rb.freezeRotation = true;
+        Rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
+
     void Update()
     {
+        if (playerHp <= 0)
+        {
+            deathWindow.SetActive(true);
+            Time.timeScale = 0f;
+        }
+
+        horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Input.GetAxisRaw("Vertical");
+
+        // Проверяем, есть ли движение
+        bool isMoving = horizontal != 0 || vertical != 0;
+
+        // Мгновенно передаем состояние в аниматор
+        anim.SetBool("isMoving", isMoving);
+        float mouseHorizontal = Input.GetAxis("Mouse X");
+
+        // Поворот персонажа мышью
+        transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime * mouseHorizontal);
+
+        // Прыжок
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             Rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
         }
-        float mouseHorizontal = Input.GetAxis("Mouse X");
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
-        transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime * mouseHorizontal);
-        if (Input.GetKey(KeyCode.W))
-        {
-            transform.Translate(Vector3.forward * Time.deltaTime * speed);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.Translate(Vector3.left * Time.deltaTime * speed);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            transform.Translate(Vector3.back * Time.deltaTime * speed);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Translate(Vector3.right * Time.deltaTime * speed);
-        }
     }
-    void OnCollisionEnter(Collision collision)
+
+    void FixedUpdate()
+    {
+        // Рассчитываем направление движения относительно того, куда смотрит персонаж
+        Vector3 moveDirection = (transform.forward * vertical + transform.right * horizontal).normalized;
+
+        // Физическое перемещение без "вталкивания" в стены
+        Rb.MovePosition(Rb.position + moveDirection * speed * Time.fixedDeltaTime);
+    }
+
+    void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
-            Debug.Log("Ты на земле");
         }
     }
 

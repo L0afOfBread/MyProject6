@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.AI;
+using JetBrains.Annotations;
 
 public class EnemyController : MonoBehaviour
 {
@@ -13,8 +15,13 @@ public class EnemyController : MonoBehaviour
     private float maxChange = 8f;
     public Animator enemyAnimator;
     private bool canWalk = true;
+    private float attackCooldown = 2.0f; // Длительность анимации атаки
+    private float lastAttackTime;
+
+    public Slider playerHpSlider;
     void Start()
     {
+        playerHpSlider.value = 100f;
         agent = GetComponent<NavMeshAgent>();
         ChangeDirection();
     }
@@ -55,9 +62,22 @@ public class EnemyController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            // Враг останавливается
             canWalk = false;
+            agent.ResetPath(); // Останавливаем NavMeshAgent, чтобы он не толкал игрока
             enemyAnimator.SetBool("Walk", false);
-            enemyAnimator.SetTrigger("Attack");
+
+            // Проверяем, прошло ли достаточно времени для следующего удара
+            if (Time.time >= lastAttackTime + attackCooldown)
+            {
+                enemyAnimator.SetTrigger("Attack");
+
+                // Наносим урон
+                PlayerController.playerHp -= 10;
+                playerHpSlider.value = PlayerController.playerHp;
+
+                lastAttackTime = Time.time;
+            }
         }
     }
 }
