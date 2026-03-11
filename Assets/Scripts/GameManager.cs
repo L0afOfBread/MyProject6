@@ -11,4 +11,9 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         PlayerController.playerHp = 100f;
     }
+
+    public void RepairCar()
+    {
+        Debug.Log("Car Repaired");
+    }
 }
