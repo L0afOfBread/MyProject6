@@ -5,6 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject abandonedCar;
+    public GameObject repairedCar;
+    public GameObject carInvZone;
+    public GameObject carInv;
+
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -14,6 +19,9 @@ public class GameManager : MonoBehaviour
 
     public void RepairCar()
     {
-        Debug.Log("Car Repaired");
+        abandonedCar.SetActive(false);
+        repairedCar.SetActive(true);
+        carInvZone.SetActive(false);
+        carInv.SetActive(false);
     }
 }

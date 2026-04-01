@@ -14,11 +14,17 @@ public class PlayerController : MonoBehaviour
     private float horizontal;
     private float vertical;
     private bool isGrounded = false;
+    private bool isDriving = false;
 
     public static float playerHp = 100f;
     private Animator anim;
 
     public GameObject deathWindow;
+    public EyeSight eyeSight;
+
+    public GameObject player;
+    public RealisticCarController carController;
+    public GameObject carCamera;
 
     void Start()
     {
@@ -54,6 +60,14 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             Rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+        }
+        if (eyeSight.canDrive == true && Input.GetKeyDown(KeyCode.E))
+        {
+            isDriving = true;
+            carController.enabled = true;
+            player.SetActive(false);
+            carCamera.SetActive(true);
+            eyeSight.actionText.text = "";
         }
     }
 
