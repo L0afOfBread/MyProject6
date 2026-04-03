@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
     public EyeSight eyeSight;
 
     public GameObject player;
-    public RealisticCarController carController;
+    public SimpleCarController carController;
     public GameObject carCamera;
 
     void Start()

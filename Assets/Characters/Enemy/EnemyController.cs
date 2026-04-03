@@ -17,6 +17,7 @@ public class EnemyController : MonoBehaviour
     private bool canWalk = true;
     private float attackCooldown = 2.0f; // Длительность анимации атаки
     private float lastAttackTime;
+    public GameObject explosion;
 
     public Slider playerHpSlider;
     void Start()
@@ -79,5 +80,19 @@ public class EnemyController : MonoBehaviour
                 lastAttackTime = Time.time;
             }
         }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("repairedCar"))
+        {
+            explosion.SetActive(true);
+            StartCoroutine(Wait(3f));
+            //enemyAnimator.SetTrigger("Death");
+        }
+    }
+    IEnumerator Wait(float time)
+    {
+        yield return new WaitForSeconds(time);
+        Destroy(gameObject);
     }
 }
