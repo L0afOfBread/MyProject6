@@ -17,7 +17,10 @@ public class EnemyController : MonoBehaviour
     private bool canWalk = true;
     private float attackCooldown = 2.0f; // Длительность анимации атаки
     private float lastAttackTime;
-    public GameObject explosion;
+
+    private bool isDead = false;
+
+    public ParticleSystem bloodEff;
 
     public Slider playerHpSlider;
     void Start()
@@ -30,27 +33,30 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        AnimatorClipInfo[] clipInfo = enemyAnimator.GetCurrentAnimatorClipInfo(0);
-        Debug.Log(clipInfo[0].clip.name);
-        if (Vector3.Distance(transform.position, player.position) <= 25f && canWalk == true)
+        if (isDead == false)
         {
-            agent.SetDestination(player.position);
-            enemyAnimator.SetBool("Walk", true);
-        }
-        else if (canWalk == true)
-        {
-            enemyAnimator.SetBool("Walk", true);
-            changeDirectionTimer -= Time.deltaTime;
-            if (changeDirectionTimer <= 0f)
+            AnimatorClipInfo[] clipInfo = enemyAnimator.GetCurrentAnimatorClipInfo(0);
+            Debug.Log(clipInfo[0].clip.name);
+            if (Vector3.Distance(transform.position, player.position) <= 25f && canWalk == true)
             {
-                ChangeDirection();
+                agent.SetDestination(player.position);
+                enemyAnimator.SetBool("Walk", true);
             }
-            agent.SetDestination(transform.position + randomDirection);
-        }
-        if (clipInfo[0].clip.name != "EnemyAttack")
-        {
-            canWalk = true;
-        }
+            else if (canWalk == true)
+            {
+                enemyAnimator.SetBool("Walk", true);
+                changeDirectionTimer -= Time.deltaTime;
+                if (changeDirectionTimer <= 0f)
+                {
+                    ChangeDirection();
+                }
+                agent.SetDestination(transform.position + randomDirection);
+            }
+            if (clipInfo[0].clip.name != "EnemyAttack")
+            {
+                canWalk = true;
+            }
+        }            
     }
 
     void ChangeDirection()
@@ -84,10 +90,14 @@ public class EnemyController : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("repairedCar"))
-        {
-            explosion.SetActive(true);
-            StartCoroutine(Wait(3f));
-            //enemyAnimator.SetTrigger("Death");
+        {            
+            canWalk = false;
+            bloodEff.Play();
+            StartCoroutine(Wait(4f));
+            isDead = true;
+            Debug.Log(isDead);
+            enemyAnimator.SetTrigger("Death");
+            enemyAnimator.SetBool("Walk", false);
         }
     }
     IEnumerator Wait(float time)
